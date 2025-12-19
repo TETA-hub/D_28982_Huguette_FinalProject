@@ -80,3 +80,23 @@ INSERT INTO rewards VALUES (
     SYSTIMESTAMP,
     'REDEEM'
 );
+
+
+
+4️⃣ DATA VALIDATION QUERIES
+-- Check all tables
+SELECT * FROM customers;
+SELECT * FROM purchases;
+SELECT * FROM rewards;
+SELECT * FROM point_rules;
+
+-- Join test
+SELECT c.first_name, p.total_amount
+FROM customers c
+JOIN purchases p ON c.customer_id = p.customer_id;
+
+-- Aggregation test
+SELECT customer_id, SUM(points_earned - points_redeemed) AS total_points
+FROM rewards
+GROUP BY customer_id;
+
