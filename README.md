@@ -39,7 +39,7 @@ This system replaces manual loyalty tracking with **automated, rule-based, and a
 * **Student ID:** 28982
 * **Course:** Database Development with PL/SQL (INSY 8311)
 * **Institution:** Adventist University of Central Africa (AUCA)
-* **Academic Year:** 2025–2026
+* **Academic Year:** 2025
 * **Project Type:** Individual Capstone / Final Exam
 
 ---
