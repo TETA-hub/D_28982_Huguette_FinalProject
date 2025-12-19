@@ -1,0 +1,82 @@
+3️⃣ INSERT DATA )
+🔹 POINT_RULES (2–3 rows REQUIRED)
+INSERT INTO point_rules VALUES (
+    seq_rule_id.NEXTVAL,
+    'STANDARD RULE',
+    100,
+    1,
+    DATE '2024-01-01',
+    NULL
+);
+
+INSERT INTO point_rules VALUES (
+    seq_rule_id.NEXTVAL,
+    'PROMO RULE',
+    50,
+    2,
+    DATE '2024-06-01',
+    DATE '2024-12-31'
+);
+
+🔹 CUSTOMERS (Sample – you will later expand)
+INSERT INTO customers VALUES (
+    seq_customer_id.NEXTVAL,
+    'Alice',
+    'Mukamana',
+    'alice@gmail.com',
+    '0788001122',
+    DATE '1998-05-12',
+    SYSDATE,
+    'BRONZE'
+);
+
+INSERT INTO customers VALUES (
+    seq_customer_id.NEXTVAL,
+    'Jean',
+    'Ndayishimiye',
+    'jean@gmail.com',
+    '0799112233',
+    DATE '1995-02-20',
+    SYSDATE,
+    'SILVER'
+);
+
+🔹 PURCHASES
+INSERT INTO purchases VALUES (
+    seq_purchase_id.NEXTVAL,
+    10001,
+    SYSTIMESTAMP,
+    15000,
+    'MOMO',
+    'Grocery purchase'
+);
+
+INSERT INTO purchases VALUES (
+    seq_purchase_id.NEXTVAL,
+    10002,
+    SYSTIMESTAMP,
+    32000,
+    'CARD',
+    'Electronics'
+);
+
+🔹 REWARDS
+INSERT INTO rewards VALUES (
+    seq_reward_id.NEXTVAL,
+    10001,
+    20001,
+    150,
+    0,
+    SYSTIMESTAMP,
+    'EARN'
+);
+
+INSERT INTO rewards VALUES (
+    seq_reward_id.NEXTVAL,
+    10002,
+    NULL,
+    0,
+    100,
+    SYSTIMESTAMP,
+    'REDEEM'
+);
