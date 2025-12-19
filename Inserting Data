@@ -1,4 +1,4 @@
-3️⃣ INSERT DATA )
+3️⃣ INSERTING DATA 
 🔹 POINT_RULES (2–3 rows REQUIRED)
 INSERT INTO point_rules VALUES (
     seq_rule_id.NEXTVAL,
@@ -18,7 +18,7 @@ INSERT INTO point_rules VALUES (
     DATE '2024-12-31'
 );
 
-🔹 CUSTOMERS (Sample – you will later expand)
+🔹 CUSTOMERS 
 INSERT INTO customers VALUES (
     seq_customer_id.NEXTVAL,
     'Alice',
