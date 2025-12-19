@@ -82,6 +82,10 @@ INSERT INTO rewards VALUES (
 );
 
 
+The TRANSACTIONS_LOG table is an audit table.
+It is intentionally left empty in Phase V because it is populated automatically by database triggers implemented in Phase VII.
+This ensures accurate, secure, and tamper-proof audit logging.”
+
 
 4️⃣ DATA VALIDATION QUERIES
 -- Check all tables
