@@ -1,0 +1,251 @@
+1️⃣ HOLIDAYS TABLE
+
+We must store public holidays.
+
+CREATE TABLE public_holidays (
+    holiday_id    NUMBER PRIMARY KEY,
+    holiday_date  DATE UNIQUE NOT NULL,
+    description   VARCHAR2(100)
+);
+
+CREATE SEQUENCE seq_holiday_id START WITH 1 INCREMENT BY 1;
+
+Sample Holidays (upcoming month – example)
+INSERT INTO public_holidays VALUES (
+    seq_holiday_id.NEXTVAL,
+    DATE '2025-01-01',
+    'New Year'
+);
+
+INSERT INTO public_holidays VALUES (
+    seq_holiday_id.NEXTVAL,
+    DATE '2025-01-07',
+    'Heroes Day'
+);
+
+COMMIT;
+
+2️⃣ FUNCTION: CHECK IF TODAY IS RESTRICTED
+
+This function:
+*Checks weekday
+*Checks public holiday
+
+CREATE OR REPLACE FUNCTION fn_is_restricted_day
+RETURN BOOLEAN
+IS
+    v_day  VARCHAR2(10);
+    v_cnt  NUMBER;
+BEGIN
+    -- Get day name
+    v_day := TO_CHAR(SYSDATE, 'DY', 'NLS_DATE_LANGUAGE=ENGLISH');
+
+    -- Block Monday to Friday
+    IF v_day IN ('MON','TUE','WED','THU','FRI') THEN
+        RETURN TRUE;
+    END IF;
+
+    -- Check public holidays
+    SELECT COUNT(*)
+    INTO v_cnt
+    FROM public_holidays
+    WHERE holiday_date = TRUNC(SYSDATE);
+
+    IF v_cnt > 0 THEN
+        RETURN TRUE;
+    END IF;
+
+    RETURN FALSE;
+END;
+/
+
+3️⃣ PROCEDURE: AUDIT LOGGING
+
+This procedure inserts into TRANSACTIONS_LOG.
+
+CREATE OR REPLACE PROCEDURE pr_log_audit (
+    p_table_name     VARCHAR2,
+    p_operation      VARCHAR2,
+    p_record_id      NUMBER,
+    p_old_value      CLOB,
+    p_new_value      CLOB
+)
+IS
+BEGIN
+    INSERT INTO transactions_log (
+        log_id,
+        table_name,
+        operation_type,
+        record_id,
+        old_value,
+        new_value
+    )
+    VALUES (
+        seq_log_id.NEXTVAL,
+        p_table_name,
+        p_operation,
+        p_record_id,
+        p_old_value,
+        p_new_value
+    );
+END;
+/
+
+4️⃣ TRIGGER: RESTRICTION + AUDIT (CUSTOMERS TABLE)
+
+This trigger:
+
+Blocks weekday & holiday operations
+
+Logs every attempt
+
+CREATE OR REPLACE TRIGGER trg_customers_restrict_audit
+BEFORE INSERT OR UPDATE OR DELETE ON customers
+FOR EACH ROW
+BEGIN
+    -- Restriction check
+    IF fn_is_restricted_day THEN
+        RAISE_APPLICATION_ERROR(
+            -20010,
+            'Operation denied: Transactions are allowed only on weekends and non-holidays'
+        );
+    END IF;
+
+    -- Audit logging
+    IF INSERTING THEN
+        pr_log_audit(
+            'CUSTOMERS',
+            'INSERT',
+            :NEW.customer_id,
+            NULL,
+            'New customer inserted'
+        );
+    ELSIF UPDATING THEN
+        pr_log_audit(
+            'CUSTOMERS',
+            'UPDATE',
+            :OLD.customer_id,
+            'Customer updated',
+            'Customer updated'
+        );
+    ELSIF DELETING THEN
+        pr_log_audit(
+            'CUSTOMERS',
+            'DELETE',
+            :OLD.customer_id,
+            'Customer deleted',
+            NULL
+        );
+    END IF;
+END;
+/
+
+5️⃣ TRIGGER: RESTRICTION + AUDIT (PURCHASES TABLE)
+
+CREATE OR REPLACE TRIGGER trg_purchases_restrict_audit
+BEFORE INSERT OR UPDATE OR DELETE ON purchases
+FOR EACH ROW
+BEGIN
+    IF fn_is_restricted_day THEN
+        RAISE_APPLICATION_ERROR(
+            -20011,
+            'Operation denied: Purchases allowed only on weekends and non-holidays'
+        );
+    END IF;
+
+    IF INSERTING THEN
+        pr_log_audit(
+            'PURCHASES',
+            'INSERT',
+            :NEW.purchase_id,
+            NULL,
+            'New purchase recorded'
+        );
+    ELSIF UPDATING THEN
+        pr_log_audit(
+            'PURCHASES',
+            'UPDATE',
+            :OLD.purchase_id,
+            'Purchase updated',
+            'Purchase updated'
+        );
+    ELSIF DELETING THEN
+        pr_log_audit(
+            'PURCHASES',
+            'DELETE',
+            :OLD.purchase_id,
+            'Purchase deleted',
+            NULL
+        );
+    END IF;
+END;
+/
+
+6️⃣ TRIGGER: REWARDS TABLE
+
+CREATE OR REPLACE TRIGGER trg_rewards_restrict_audit
+BEFORE INSERT OR UPDATE OR DELETE ON rewards
+FOR EACH ROW
+BEGIN
+    IF fn_is_restricted_day THEN
+        RAISE_APPLICATION_ERROR(
+            -20012,
+            'Operation denied: Rewards operations restricted'
+        );
+    END IF;
+
+    IF INSERTING THEN
+        pr_log_audit(
+            'REWARDS',
+            'INSERT',
+            :NEW.reward_id,
+            NULL,
+            'Reward transaction'
+        );
+    ELSIF UPDATING THEN
+        pr_log_audit(
+            'REWARDS',
+            'UPDATE',
+            :OLD.reward_id,
+            'Reward updated',
+            'Reward updated'
+        );
+    ELSIF DELETING THEN
+        pr_log_audit(
+            'REWARDS',
+            'DELETE',
+            :OLD.reward_id,
+            'Reward deleted',
+            NULL
+        );
+    END IF;
+END;
+/
+
+7️⃣ TESTING 
+❌ Weekday Test (DENIED)
+INSERT INTO customers VALUES (
+    seq_customer_id.NEXTVAL,
+    'Test',
+    'User',
+    'test@fail.com',
+    '0780000000',
+    NULL,
+    SYSDATE,
+    'BRONZE'
+);
+
+
+➡️ Expected Error
+ORA-20010: Operation denied
+
+✅ Weekend Test (ALLOWED)
+
+(Change system date or test during weekend)
+
+🔍 Audit Log Verification
+
+
+SELECT table_name, operation_type, record_id, user_name, log_timestamp
+FROM transactions_log
+ORDER BY log_timestamp DESC;
