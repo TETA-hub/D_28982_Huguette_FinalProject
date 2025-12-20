@@ -267,6 +267,22 @@ The system supports:
 
 Designed for easy integration with BI tools and dashboards.
 
+The BI component supports data-driven decision-making through KPIs, dashboards, and analytical queries.
+
+**Key KPIs include:**
+- Total sales and monthly trends
+- Customer lifetime value
+- Loyalty points earned vs redeemed
+- Restricted and denied operations
+
+**Dashboards:**
+- Executive Summary Dashboard
+- Audit & Compliance Dashboard
+- Performance Monitoring Dashboard
+
+➡️ Full BI documentation is available in  
+`business_intelligence/bi_requirements.md`
+
 ---
 
 ## 📁 Project Structure
